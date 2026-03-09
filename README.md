@@ -1,5 +1,7 @@
 # course-study
 
+![course-study banner](banner.jpeg)
+
 > Turn course PDFs into comprehensive study notes — with worked examples, cross-lecture connections, and external sourcing. Built for exam season.
 
 ---
