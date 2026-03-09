@@ -1,12 +1,12 @@
 # course-study
 
-> Turn any lecture slides, course PDFs, or topic list into comprehensive study notes — with worked examples, cross-lecture connections, and external sourcing. Built for exam season.
+> Turn course PDFs into comprehensive study notes — with worked examples, cross-lecture connections, and external sourcing. Built for exam season.
 
 ---
 
 ## What problem does this solve?
 
-You have a stack of lecture slides. Your exam is in three days. You need study notes that actually help you understand, not just a pile of bullet points you copied from slides.
+You have a stack of lecture PDFs. Your exam is in three days. You need study notes that actually help you understand, not just a pile of bullet points you copied from slides.
 
 Standard summarizers give you a compressed version of what you already have. **This skill gives you something different:**
 
@@ -27,7 +27,7 @@ Any university or college student preparing for exams, writing summaries, or try
 - Humanities (history, philosophy, literature)
 - Professional programs (law, medicine, business)
 
-The only requirement: you have some course materials to work from (slides, PDFs, notes, or even just a course name).
+The only requirement: course materials in PDF format (or a topic list, or just a course name).
 
 ---
 
@@ -37,7 +37,7 @@ The skill runs in four phases. You stay in control at every step.
 
 ```
 Phase 1 — Extract
-  Every page of every slide is processed. Nothing is skipped or merged.
+  Every page of every PDF is processed via the /pdf skill. Nothing is skipped or merged.
   Output: lecture-by-lecture extraction with all concepts, formulas, and diagrams.
 
 Phase 2 — Synthesize
@@ -45,8 +45,8 @@ Phase 2 — Synthesize
   against standard curricula for your subject (via live search).
   Output: a full knowledge architecture of the course.
 
-Phase 3 — Expand  [optional]
-  Key concepts are traced to real-world implementations, original papers, and
+Phase 3 — Expand  [optional, Complete mode only]
+  Key concepts traced to real-world implementations, original papers, and
   industry documentation. Every external claim is sourced.
   Output: annotated expansion of concepts worth knowing beyond the slides.
 
@@ -56,25 +56,20 @@ Phase 4 — Study
   Output: study-notes.md
 ```
 
-After each phase, the skill pauses and asks: does this look right? You can adjust, stop, or continue.
+After each phase, the skill gives a one-line status and asks if you want to adjust or continue.
 
 ---
 
-## Supported input formats
+## Supported input
 
-Upload your materials directly — no conversion needed in most cases:
-
-| Format | Notes |
+| Input | How to provide |
 |---|---|
-| PDF (slide export, scanned, standalone) | Fully supported |
-| PowerPoint / PPTX | Fully supported |
-| Word / DOCX | Fully supported |
-| Images of slides (PNG, JPG) | Fully supported |
-| Plain text or Markdown notes | Fully supported |
-| Topic / concept list (pasted in chat) | Skips to Phase 2 |
-| Just a course name | Skill searches for a standard syllabus and builds from there |
+| **PDF** (slide export, scanned, standalone) | Upload directly — primary format |
+| PowerPoint / PPTX, Word / DOCX, images | Convert to PDF first using `/pdf` skill, then upload |
+| Topic / concept list | Paste in chat — skips Phase 1, goes straight to Phase 2 |
+| Just a course name | Type it — skill searches for a standard syllabus and builds from there |
 
-> Need to convert a file first? Use the `/pdf` skill.
+> All PDF reading is handled by the `/pdf` skill. No Python file I/O is used.
 
 ---
 
@@ -83,7 +78,7 @@ Upload your materials directly — no conversion needed in most cases:
 All study notes are written in format-agnostic Markdown:
 
 - **Renders** in any Markdown viewer (Obsidian, Notion, VS Code, GitHub)
-- **Exports** to PDF via pandoc or the `/pdf` skill — with full font support for Chinese, Japanese, Korean, and other non-Latin scripts
+- **Exports** to PDF via the `/pdf` skill — with full font support for Chinese, Japanese, Korean, and other non-Latin scripts
 - **Readable** as plain text even with all formatting stripped
 
 Each concept block includes:
@@ -100,9 +95,9 @@ Misconceptions   — what students commonly get wrong
 
 ---
 
-## Scale and context management
+## Scale handling
 
-Before starting, the skill estimates your total content volume and picks a strategy:
+The skill estimates total page count upfront and picks a processing strategy automatically:
 
 | Course size | Strategy |
 |---|---|
@@ -111,7 +106,7 @@ Before starting, the skill estimates your total content volume and picks a strat
 | 201–400 pages | Batch + compress intermediate output |
 | > 400 pages | Recommend splitting by module |
 
-Large courses are handled in batches — the skill will never silently truncate or skip material.
+Large courses are processed in batches — nothing is silently skipped.
 
 ---
 
@@ -119,7 +114,7 @@ Large courses are handled in batches — the skill will never silently truncate 
 
 **Complete** *(default)* — All four phases. Best for learning something new or preparing a thorough review.
 
-**Focused** — Phases 1, 2, and 4 only. Skips external expansion. Useful when you know the field and need notes fast.
+**Focused** — Phases 1, 2, and 4 only. Skips external expansion. Faster; best when you know the field and need notes quickly.
 
 Both modes produce full-quality notes with worked examples. Neither is a shortcut that produces worse output.
 
@@ -130,9 +125,27 @@ Both modes produce full-quality notes with worked examples. Neither is a shortcu
 Phase 3 requires network access (WebSearch + WebFetch).
 
 - **With web access:** searches industry documentation, engineering blogs, GitHub implementations, and academic papers. Every claim is sourced.
-- **Without web access:** expansion uses stable domain knowledge instead. All claims are marked `[Standard curriculum knowledge]`. No hallucinated sources.
+- **Without web access:** expansion uses stable domain knowledge. All claims are marked `[Standard curriculum knowledge]`. No hallucinated sources.
 
-The skill detects network access at the start and tells you which mode it will use.
+The skill detects network access at intake and tells you which mode applies.
+
+---
+
+## Changelog
+
+### v1.1.0
+- **PDF-only input:** all course file reading now routes through the `/pdf` skill; direct Python/file I/O banned
+- **Faster intake:** Phase 0 compressed to a single exchange — no more multi-step question forms
+- **Faster checkpoints:** post-phase check simplified to a one-line prompt instead of a three-question form
+- **Smarter batching:** Phase 2 explicitly batches large courses to avoid context overflow
+- **Faster Phase 4 verification:** completeness check is now a spot-check pass, not a full re-read
+
+### v1.0.0
+- Initial release: four-phase Extract → Synthesize → Expand → Study workflow
+- Dual-mode Phase 3 (web-enabled / curriculum-grounded)
+- Scale-aware compression strategy
+- CJK font support for bilingual PDF export
+- Live curriculum search for any academic subject
 
 ---
 
@@ -143,7 +156,7 @@ course-study/
 ├── SKILL.md                  # Entry point, intake flow, global rules
 ├── README.md                 # This file
 └── rules/
-    ├── phase-extract.md      # Phase 1: page-level extraction
+    ├── phase-extract.md      # Phase 1: PDF extraction via /pdf skill
     ├── phase-synthesize.md   # Phase 2: cross-lecture synthesis and gap analysis
     ├── phase-expand.md       # Phase 3: external knowledge expansion
     ├── phase-study.md        # Phase 4: final study notes
@@ -158,34 +171,26 @@ course-study/
 ```
 User: I have 6 lecture PDFs for my Organic Chemistry course. Finals in 4 days.
 
-Skill: [Phase 0]
-  Input: 6 PDFs — estimated 180 pages total
-  Strategy: batch by lecture, per-lecture summaries before synthesis
-  Web access: available — Phase 3 will run at full depth
-  Mode: Complete
-  Output: ./orgo-notes/
-  Confirm?
+Skill: Got it — 6 PDFs, ~180 pages. Batching by lecture. Web access ✓.
+  Mode: Complete or Focused?  Output folder?
 
-User: Yes, let's go.
+User: Complete. Save to ./orgo-notes/
 
-Skill: [Phase 1] Extracting lecture-01-extract.md...
-  ...6 lectures processed.
+Skill: Starting Phase 1...
+  [reads each PDF via /pdf skill, extracts page by page]
 
-  Phase 1 complete.
-  1. Coverage: looks complete / gaps / significant gaps?
-  2. Depth: appropriate / too shallow / too verbose?
-  3. Continue to Phase 2?
+  ✓ Phase 1 done — 6 lectures, 180 pages, 94 concepts extracted.
+  Issues? Or say "continue".
 
-User: Looks good. Continue.
+User: Continue.
 
-Skill: [Phase 2] Building course-synthesis.md...
-  ...cross-lecture connections mapped, gaps identified.
+Skill: ✓ Phase 2 done — 5 modules mapped, 3 gaps flagged
+  (stereochemistry and reaction mechanisms lighter than standard orgo curricula).
+  Continue to Phase 3?
 
-  Key gaps found: stereochemistry and reaction mechanisms in Phase 1
-  are lightly covered compared to standard orgo curricula.
-  Flagged for Phase 3 expansion.
+User: Yes.
 
-[Continues through Phase 3 and Phase 4...]
+[Phase 3 and 4 follow...]
 
-Skill: study-notes.md complete — 87 pages, 24 concepts with full worked examples.
+Skill: ✓ study-notes.md complete — 24 core concepts, all with worked examples.
 ```
