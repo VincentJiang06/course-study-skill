@@ -82,19 +82,17 @@ At every lecture/module boundary, insert a bridge:
 
 Bridges transform a set of notes into a coherent learning narrative.
 
-### Step 4: Verify completeness
+### Step 4: Verify completeness (fast pass)
 
-**Per-lecture:** Does every concept from Phase 1's concept lists appear in the study notes? Cross-reference.
-
-**Examples:** Every "Core" concept has at least one worked example. No `[TODO]` placeholders.
-
-**Phase 3 integration:** Every expansion entry from `course-expansion.md` appears at the relevant concept block.
-
-**Source traceability:** Every concept has a source location. Every external claim has a Phase 3 source.
+Run a quick cross-reference — do not re-read everything in full:
+- Spot-check: do the Phase 1 concept lists match headings in study notes? Flag any missing.
+- Confirm no `[TODO]` placeholders remain.
+- Confirm Phase 3 expansion entries are embedded (not appended at the end).
+- Source locations present on all concepts? If any are missing, add from Phase 1.
 
 ### Step 5: Format output
 
-Write in format-agnostic Markdown. See [templates.md](templates.md) (in the same `rules/` folder). Generate `study-notes.md` as primary output. If user requested PDF, apply the pdf skill.
+Write in format-agnostic Markdown per [templates.md](templates.md). Generate `study-notes.md` as primary output. For PDF export, apply the `/pdf` skill — do not use Python or pandoc directly.
 
 ## Writing style
 

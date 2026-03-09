@@ -2,143 +2,115 @@
 
 ## Goal
 
-Extract every concept, definition, formula, algorithm, code snippet, and diagram from the course materials, **strictly aligned to the backbone structure** (page numbers for PDFs/slides; section numbers for topic lists or generated syllabi). Zero information loss is the target.
+Extract every concept, definition, formula, algorithm, code snippet, and diagram from the course PDFs, **strictly aligned to page numbers**. Zero information loss is the target.
 
-## Backbone types
+## File reading rule
 
-The backbone format depends on what the user provided (set in Phase 0):
+**Always use the `/pdf` skill to read PDF files.** Do not use Python, bash, or any direct file I/O. Invoke `/pdf` with the uploaded file, then work from its output.
 
-| Input type | Backbone unit | Reference format |
+If a file is not already a PDF, stop and ask the user to convert it using `/pdf` first before continuing.
+
+## Backbone reference format
+
+| Input type | Unit | Reference format |
 |---|---|---|
 | PDF / slide file | Page number | `Lecture X, p. Y` |
-| Topic list (pasted/uploaded) | Section item | `Section X.Y` |
+| Topic list | Section item | `Section X.Y` |
 | Generated syllabus | Syllabus entry | `Module X, Section Y` |
 
-All subsequent phases (Synthesis, Expansion, Study) use this same reference format. Do not mix formats within a course.
+Use the same format throughout all phases. Do not mix formats.
 
-## For PDF/slide inputs
+## Extraction procedure
 
-### Step 1: Read the full file first
+### Step 1: Read via /pdf skill
 
-Scan the entire file to understand scope. Note total page count — you need it for the length check.
+Invoke the `/pdf` skill on the uploaded file. Note total page count from the output.
 
 ### Step 2: Page-by-page extraction
 
-For EVERY page, output one block:
+For EVERY page, output one block. Keep blocks dense — no padding:
 
 ```markdown
 ### Page X (of N) — [Slide title]
 
 **Key content:**
-[Extract ALL substantive content. Include:]
-- Definitions (exact wording from the slide)
-- Formulas ($LaTeX$ notation)
-- Algorithms (pseudocode or code block)
-- Diagrams (describe structure, label all named elements)
-- Lists and bullet points (preserve hierarchy)
-- Examples (reproduce in full)
-- Emphasized or warning text
+- [Definitions — exact wording]
+- [Formulas — $LaTeX$]
+- [Algorithms — pseudocode or code block]
+- [Diagrams — describe structure, name all labeled elements]
+- [Tables — reproduce as Markdown]
+- [Examples — reproduce in full]
 
-**Concepts introduced:** [comma-separated list]
-
-**[EXPAND]:** [optional — if a concept needs external investigation, note it here with reason]
+**Concepts introduced:** [comma-separated]
+**[EXPAND]:** [concept — reason] *(omit if nothing to flag)*
 ```
 
-Title pages and transition slides still get a block:
+Empty/title pages still get a block:
 ```markdown
 ### Page 1 (of 30) — Course Title
 **Key content:** [Title page — no substantive content]
 **Concepts introduced:** —
 ```
 
-### Step 3: Special content handling
+### Step 3: Speed calibration by tier
 
-**Formulas:** Always LaTeX. For complex formulas, explain each symbol below the formula.
+Apply the tier set in Phase 0:
 
-**Code:** Reproduce in full with language annotation. Never paraphrase code.
+| Tier | Page handling |
+|---|---|
+| Light (≤60p) | Full block per page |
+| Medium (61–200p) | Full block per page; write lecture summary after each lecture |
+| Heavy (201–400p) | Full block per page; after each lecture, compress to concept-inventory format (concept + location + type only) before moving to next lecture |
 
-**Diagrams:** Name every labeled element. For graphs, describe axes, scale, trends.
+For Heavy tier, the concept-inventory format is:
+```
+- [Concept name] | Lecture X, pp. Y-Z | [definition/theorem/algorithm/pattern]
+```
+This replaces the full block in memory but the full blocks are still written to the extract file.
 
-**Tables:** Reproduce as Markdown tables. No dropped columns or rows.
-
-### Step 4: Verify completeness
+### Step 4: Completeness check (fast)
 
 ```
-Total pages in file: N
-Total "### Page X" blocks: must equal N
+Pages in file: N  →  "### Page X" blocks in output: must = N
 ```
 
-For content-rich pages (not title/transition), each block should have ≥ 5 lines of substantive content. If shorter, re-read the page.
+Content-rich pages: each block ≥ 5 lines of substantive content. If shorter, re-read the page.
 
-### Step 5: Lecture summary block
+### Step 5: Lecture summary (append to extract file)
 
 ```markdown
 ## Lecture Summary
 
 **Topic:** [main topic]
 **Total pages:** N
-**Key concepts (ordered by appearance):** [numbered list]
-**Prerequisites assumed:** [concepts from earlier lectures]
+**Key concepts (by appearance):** [numbered list — keep brief]
+**Prerequisites assumed:** [from earlier lectures]
 **[EXPAND] markers:** [list with page refs]
-**Open questions:** [anything unclear or contradictory]
+**Open questions:** [unclear or contradictory items]
 ```
 
 ---
 
 ## For topic list inputs
 
-When the user provides a structured topic list (not a PDF), generate a backbone outline first:
+When the user pastes a topic list instead of a PDF:
 
-### Step 1: Parse the topic list
-
-Group items into a hierarchy:
-- Top level → Lecture/Module
-- Second level → Section
-- Third level → Sub-concept
-
-Assign section numbers: `1.1`, `1.2`, `2.1`, etc.
-
-### Step 2: Write a backbone outline file
-
-Output `course-backbone.md`:
-
-```markdown
-# Course Backbone: [Course Name]
-
-## Module 1: [Theme]
-### 1.1 [Topic]
-### 1.2 [Topic]
-
-## Module 2: [Theme]
-...
-```
-
-Present this to the user and ask: "Does this structure look right?" Adjust before proceeding.
-
-### Step 3: Populate each section
-
-For each section node in the backbone, write a concept block using your world knowledge of the subject area:
-
-```markdown
-### Section 1.1 — [Topic Name]
-
-**Definition:** [precise definition]
-**Core content:** [key ideas, properties, distinctions]
-**Formulas / algorithms:** [if applicable]
-**[EXPAND]:** [if external sourcing would add value]
-```
-
-Mark all content generated this way with `[From: world knowledge — no source PDF]`.
+1. Parse into hierarchy: Top level → Module, Second → Section, Third → Sub-concept
+2. Assign numbers: `1.1`, `1.2`, `2.1`, etc.
+3. Write `course-backbone.md` with the full outline
+4. Show the user: "Does this structure look right?" — adjust if needed
+5. Populate each section with world-knowledge concept blocks, marked `[From: world knowledge — no source PDF]`
 
 ---
 
 ## Output
 
-One file per input: `lecture-XX-extract.md` (zero-padded). If the input was a topic list, also output `course-backbone.md`.
+- `lecture-XX-extract.md` per PDF (zero-padded)
+- `course-backbone.md` if input was a topic list
 
 ## Anti-patterns
 
-- **DO NOT** merge multiple pages into one block.
-- **DO NOT** skip pages you consider unimportant.
-- **DO NOT** rephrase definitions in your own words without preserving the original first.
-- **DO NOT** pad the extraction with repeated summaries or meta-commentary — the value is structured, dense content.
+- **DO NOT** read PDFs with Python or direct file tools — use `/pdf` skill only
+- **DO NOT** merge multiple pages into one block
+- **DO NOT** skip pages you consider unimportant
+- **DO NOT** pad with meta-commentary — dense content only

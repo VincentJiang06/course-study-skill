@@ -16,12 +16,12 @@ Never reference source locations that don't exist in Phase 1 outputs.
 
 ### Step 1: Build the concept inventory
 
-Read all `lecture-XX-extract.md` files. For each concept, record:
+Read all `lecture-XX-extract.md` files using the Read tool (these are Markdown files, not PDFs — no `/pdf` skill needed here). For each concept, record:
 - First appearance (source location)
 - All subsequent mentions (source locations)
 - Type: definition / theorem / algorithm / design pattern / tool
 
-For large courses (> 200 pages, as estimated in Phase 0), work in batches of 3-4 lectures at a time, building a running inventory rather than trying to hold everything at once.
+**For Medium/Heavy tier courses (> 60 pages):** work in batches of 3-4 lectures at a time, building a running inventory. Do not hold all lectures in context simultaneously.
 
 ### Step 2: Dependency analysis
 
@@ -85,7 +85,9 @@ For each gap: "The slides present [X] as [simplified]. The full picture includes
 
 ## Depth expectations
 
-For a 12-lecture course, the synthesis should be 2000-4000 words minimum. The test: could a student who missed the entire course read this and understand the *architecture* of the subject (not the details, but the structure of the knowledge)?
+For a 12-lecture course, synthesis should be substantial but not padded. Target: every module section has a dependency chain and a key insight. Skip the narrative fluff — the value is in the connections and gaps, not word count.
+
+The test: could a student read this and understand the *architecture* of the subject — what depends on what, and what the course missed?
 
 ## Anti-patterns
 
