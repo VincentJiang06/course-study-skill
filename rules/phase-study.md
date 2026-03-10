@@ -94,6 +94,80 @@ Run a quick cross-reference — do not re-read everything in full:
 
 Write in format-agnostic Markdown per [templates.md](templates.md). Generate `study-notes.md` as primary output. For PDF export, apply the `/pdf` skill — do not use Python or pandoc directly.
 
+### Step 6: Generate Exam Ready appendices (Exam Ready mode only)
+
+If the user selected **Exam Ready** in Phase 0 — or requests it now for the first time — generate two additional files after `study-notes.md` is complete. Do not restart earlier phases; generate the appendices from the outputs already produced.
+
+#### 6a: quick-reference.md
+
+A compact reference card designed for last-minute review or open-book use.
+
+Rules:
+- Every entry fits in one table row or one bullet — no prose paragraphs
+- Ordered by **exam relevance** (most likely to appear on exam first), not lecture order
+- Infer exam relevance from: Phase 2 course narrative, Phase 2 gap flags, [EXPAND] markers from Phase 1, and user-specified priority topics from Phase 0
+- Source refs omitted (speed over traceability in this document)
+
+Structure:
+```markdown
+# Quick Reference: [Course Name]
+
+## Formulas
+| Name | Formula | Notes |
+|------|---------|-------|
+| [Name] | $[LaTeX]$ | [When to use / key constraint] |
+
+## Key Definitions
+- **[Term]:** [One sentence]
+
+## Algorithms
+| Name | Time | Space | Key idea |
+|------|------|-------|----------|
+| [Name] | O(?) | O(?) | [One line] |
+
+## Common Traps
+- [Specific mistake students make and what the correct behaviour is]
+
+## X vs Y (Decision Tables)
+[When you have two or more easily confused concepts, a two-column comparison table]
+```
+
+#### 6b: exam-qa.md
+
+A bank of exam-style questions with full worked solutions.
+
+Question sourcing rules (in priority order):
+1. **Phase 2 gaps and [EXPAND] markers** — concepts the course treated superficially are prime exam targets
+2. **User-specified priority topics** from Phase 0
+3. **Cross-cutting concepts** from Phase 2 synthesis (themes that span multiple lectures)
+4. **Core definitions** — one definition question per major concept
+
+Question type selection by subject:
+| Subject type | Emphasis |
+|---|---|
+| Math / engineering / CS algorithms | Worked problems (show-your-work format) |
+| CS systems / architecture | Compare-and-contrast + design scenarios |
+| Sciences | Explain-the-phenomenon + calculation |
+| Humanities / social sciences | Short essay + source interpretation |
+| Mixed | All types, weighted by lecture content |
+
+Format per question:
+```markdown
+### Q[N]: [Short title]
+**Type:** [Definition / Worked problem / Compare / Design / Essay]
+**Likely exam weight:** [High / Medium / Low]
+
+[Question text — specific, unambiguous, matches the difficulty of the course]
+
+**Answer:**
+[Full solution. For worked problems: show every step. For compare: use a structured table or bullet pairs. For essay: a model answer outline.]
+
+**Common mistake:** [What students typically get wrong on this question]
+**Source:** [Lecture X, pp. Y-Z or Section X.Y]
+```
+
+Minimum coverage: 3 questions per major topic. At least one worked problem if the subject involves calculation or algorithms.
+
 ## Writing style
 
 **Concise but complete.** Every sentence earns its place. Cut filler, keep substance.
@@ -114,3 +188,6 @@ Write in format-agnostic Markdown per [templates.md](templates.md). Generate `st
 - **DO NOT** omit Phase 3 expansion content if Phase 3 was run.
 - **DO NOT** write walls of text — use headings, code blocks, and formula blocks for visual rhythm.
 - **DO NOT** produce content that only works in Markdown — follow templates.md format rules throughout.
+- **DO NOT** (Exam Ready) write prose in quick-reference.md — it is a lookup table, not a summary.
+- **DO NOT** (Exam Ready) write trivial questions in exam-qa.md — each question must require genuine understanding to answer.
+- **DO NOT** (Exam Ready) generate questions only from easy, well-covered topics — the most valuable questions come from Phase 2 gaps and [EXPAND] markers.

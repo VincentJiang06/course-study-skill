@@ -6,6 +6,16 @@
 
 ---
 
+## Install
+
+```bash
+clawhub install course-study
+```
+
+> Get it at **[clawhub.io](https://clawhub.io)** — the fastest way to add skills to Claude Code.
+
+---
+
 ## What problem does this solve?
 
 You have a stack of lecture PDFs. Your exam is in three days. You need study notes that actually help you understand, not just a pile of bullet points you copied from slides.
@@ -16,6 +26,7 @@ Standard summarizers give you a compressed version of what you already have. **T
 - Connections between lectures that the slides never made explicit
 - Gaps in your course flagged against standard curricula (so you know what the slides skipped)
 - External sourcing from industry docs and academic papers, not just the textbook
+- Optional **Exam Ready** package: a print-ready Quick Reference Sheet + a full Exam Q&A bank
 - Notes you can export as clean Markdown or PDF
 
 ---
@@ -38,6 +49,10 @@ The only requirement: course materials in PDF format (or a topic list, or just a
 The skill runs in four phases. You stay in control at every step.
 
 ```
+Phase 0 — Intake (one exchange)
+  Tell the skill what you have, your exam date, and any priority topics.
+  It picks a processing strategy and output package automatically.
+
 Phase 1 — Extract
   Every page of every PDF is processed via the /pdf skill. Nothing is skipped or merged.
   Output: lecture-by-lecture extraction with all concepts, formulas, and diagrams.
@@ -47,7 +62,7 @@ Phase 2 — Synthesize
   against standard curricula for your subject (via live search).
   Output: a full knowledge architecture of the course.
 
-Phase 3 — Expand  [optional, Complete mode only]
+Phase 3 — Expand
   Key concepts traced to real-world implementations, original papers, and
   industry documentation. Every external claim is sourced.
   Output: annotated expansion of concepts worth knowing beyond the slides.
@@ -55,10 +70,23 @@ Phase 3 — Expand  [optional, Complete mode only]
 Phase 4 — Study
   Everything integrated into final study notes: structured by lecture, enriched
   with examples and connections, ready for Markdown or PDF export.
-  Output: study-notes.md
+  Output: study-notes.md (+ quick-reference.md and exam-qa.md if Exam Ready)
 ```
 
 After each phase, the skill gives a one-line status and asks if you want to adjust or continue.
+
+---
+
+## Output packages
+
+**Standard** — comprehensive study notes covering all four phases.
+
+**Exam Ready** *(recommended when you have an exam date)* — everything in Standard, plus:
+
+- **Quick Reference Sheet** (`quick-reference.md`) — a compact, print-ready cheat sheet ordered by exam relevance. One line per formula, definition, and algorithm. Designed for open-book exams or last-minute review.
+- **Exam Q&A Bank** (`exam-qa.md`) — a bank of exam-style questions with full worked solutions. Questions are sourced from the most likely exam topics: course gaps, [EXPAND] markers, and cross-cutting themes — not just easy definitions.
+
+The skill auto-recommends Exam Ready if you mention an exam date at intake.
 
 ---
 
@@ -75,15 +103,7 @@ After each phase, the skill gives a one-line status and asks if you want to adju
 
 ---
 
-## Output
-
-All study notes are written in format-agnostic Markdown:
-
-- **Renders** in any Markdown viewer (Obsidian, Notion, VS Code, GitHub)
-- **Exports** to PDF via the `/pdf` skill — with full font support for Chinese, Japanese, Korean, and other non-Latin scripts
-- **Readable** as plain text even with all formatting stripped
-
-Each concept block includes:
+## Each concept block includes
 
 ```
 Definition       — exact wording from the source, then clarified
@@ -112,16 +132,6 @@ Large courses are processed in batches — nothing is silently skipped.
 
 ---
 
-## Depth modes
-
-**Complete** *(default)* — All four phases. Best for learning something new or preparing a thorough review.
-
-**Focused** — Phases 1, 2, and 4 only. Skips external expansion. Faster; best when you know the field and need notes quickly.
-
-Both modes produce full-quality notes with worked examples. Neither is a shortcut that produces worse output.
-
----
-
 ## Phase 3 and web access
 
 Phase 3 requires network access (WebSearch + WebFetch).
@@ -133,37 +143,22 @@ The skill detects network access at intake and tells you which mode applies.
 
 ---
 
-## Changelog
-
-### v1.1.0
-- **PDF-only input:** all course file reading now routes through the `/pdf` skill; direct Python/file I/O banned
-- **Faster intake:** Phase 0 compressed to a single exchange — no more multi-step question forms
-- **Faster checkpoints:** post-phase check simplified to a one-line prompt instead of a three-question form
-- **Smarter batching:** Phase 2 explicitly batches large courses to avoid context overflow
-- **Faster Phase 4 verification:** completeness check is now a spot-check pass, not a full re-read
-
-### v1.0.0
-- Initial release: four-phase Extract → Synthesize → Expand → Study workflow
-- Dual-mode Phase 3 (web-enabled / curriculum-grounded)
-- Scale-aware compression strategy
-- CJK font support for bilingual PDF export
-- Live curriculum search for any academic subject
-
----
-
 ## File structure
 
 ```
 course-study/
-├── SKILL.md                  # Entry point, intake flow, global rules
+├── SKILL.md                  # Entry point, global rules, phase references
 ├── README.md                 # This file
 └── rules/
+    ├── phase-intake.md       # Phase 0: intake flow, compression tier, output package
     ├── phase-extract.md      # Phase 1: PDF extraction via /pdf skill
     ├── phase-synthesize.md   # Phase 2: cross-lecture synthesis and gap analysis
     ├── phase-expand.md       # Phase 3: external knowledge expansion
-    ├── phase-study.md        # Phase 4: final study notes
-    ├── templates.md          # Markdown/PDF formatting rules + CJK font configuration
-    └── subject-coverage.md   # Live search strategy for any subject's standard curriculum
+    ├── phase-study.md        # Phase 4: study notes + Exam Ready appendices
+    ├── templates.md          # Format-agnostic Markdown writing rules
+    ├── pdf-export.md         # PDF conversion config (loaded only when PDF output needed)
+    ├── subject-coverage.md   # Live search strategy for any subject's standard curriculum
+    └── changelog.md          # Version history
 ```
 
 ---
@@ -173,10 +168,11 @@ course-study/
 ```
 User: I have 6 lecture PDFs for my Organic Chemistry course. Finals in 4 days.
 
-Skill: Got it — 6 PDFs, ~180 pages. Batching by lecture. Web access ✓.
-  Mode: Complete or Focused?  Output folder?
+Skill: Got it — 6 PDFs, ~180 pages. Web access ✓.
+  Output package: Standard or Exam Ready? (Exam Ready recommended — you have a deadline)
+  Output folder? Priority topics?
 
-User: Complete. Save to ./orgo-notes/
+User: Exam Ready. Save to ./orgo-notes/. Focus on reaction mechanisms.
 
 Skill: Starting Phase 1...
   [reads each PDF via /pdf skill, extracts page by page]
@@ -188,11 +184,37 @@ User: Continue.
 
 Skill: ✓ Phase 2 done — 5 modules mapped, 3 gaps flagged
   (stereochemistry and reaction mechanisms lighter than standard orgo curricula).
-  Continue to Phase 3?
+  Continue?
 
 User: Yes.
 
 [Phase 3 and 4 follow...]
 
-Skill: ✓ study-notes.md complete — 24 core concepts, all with worked examples.
+Skill: ✓ Done.
+  study-notes.md      — 24 core concepts, all with worked examples
+  quick-reference.md  — 18 formulas + 12 reaction patterns, ordered by exam relevance
+  exam-qa.md          — 34 questions across definitions, mechanisms, and design problems
 ```
+
+---
+
+## Changelog
+
+### v2.0.0 (Current)
+- **Exam Ready output package** — Quick Reference Sheet + Exam Q&A Appendix
+- **Priority topic support** — intake now asks for exam date and focus areas
+- **Modular rules structure** — Phase 0 intake extracted to `rules/phase-intake.md`; PDF export config extracted to `rules/pdf-export.md` (loaded only when needed)
+- **Hardened gap analysis** — explicit fallback when web search returns low-quality results
+- **Hardened Exam Ready handling** — late requests during Phase 4 now handled without restarting earlier phases
+
+### v1.1.0
+- PDF-only input: all course file reading routes through the `/pdf` skill
+- Faster intake: Phase 0 compressed to a single exchange
+- Smarter batching: Phase 2 batches large courses to avoid context overflow
+
+### v1.0.0
+- Initial release: four-phase Extract → Synthesize → Expand → Study workflow
+- Dual-mode Phase 3 (web-enabled / curriculum-grounded)
+- Scale-aware compression strategy
+- CJK font support for bilingual PDF export
+- Live curriculum search for any academic subject

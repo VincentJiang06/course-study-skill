@@ -1,57 +1,28 @@
 ---
 name: course-study
-version: 1.1.0
-description: Comprehensive course study, exam revision, and structured study note generation from lecture slides, course PDFs, or topic outlines. Use when the user wants to study a course, review or summarize lecture slides/PDFs, generate lecture notes or a study guide, prepare for exams (midterm, final, quiz), create revision notes or formula sheets, extract key concepts/definitions/formulas from course materials, synthesize knowledge across multiple lectures, expand understanding beyond course scope with external sources, or asks for help learning, reviewing, or revising any university or college course content in any academic subject (CS, engineering, math, science, humanities, etc.). Produces deep, multi-format study notes (Markdown + PDF) with worked examples, LaTeX formulas, cross-lecture connections, and concept dependency maps — not shallow summaries.
+description: Comprehensive course study, exam revision, and structured study note generation from lecture slides, course PDFs, or topic outlines. Use when the user wants to study a course, review or summarize lecture slides/PDFs, generate lecture notes or a study guide, prepare for exams (midterm, final, quiz), create revision notes or formula sheets, extract key concepts/definitions/formulas from course materials, synthesize knowledge across multiple lectures, expand understanding beyond course scope with external sources, or asks for help learning, reviewing, or revising any university or college course content in any academic subject (CS, engineering, math, science, humanities, etc.). Produces deep, multi-format study notes (Markdown + PDF) with worked examples, LaTeX formulas, cross-lecture connections, concept dependency maps, quick-reference sheets, and exam Q&A appendix — not shallow summaries.
+license: MIT
+model: claude-sonnet-4-6
+user-invocable: true
+metadata:
+  version: 2.0.0
+  author: claude-code
+  domains:
+    - education
+    - study
+    - exam-prep
+    - learning
 ---
 
-# Course Study
+# Course Study v2.0
 
-A structured four-phase workflow for deep learning of any university or college course: Extract → Synthesize → Expand → Study. Produces high-fidelity, multi-format study notes with strict source alignment.
+A structured four-phase workflow for deep learning of any university or college course: Extract → Synthesize → Expand → Study. Produces high-fidelity, multi-format study materials as a single, complete PDF — not shallow summaries.
+
+---
 
 ## Phase 0: Intake
 
-Run all steps below before starting any phase. **Keep this fast** — intake should take one exchange, not five.
-
-### Step 1: Accept input materials
-
-**Supported input: PDF only.** All course materials must be in PDF format.
-- If the user has PPT/PPTX, DOCX, or images: use the `/pdf` skill to convert first, then return here.
-- Do NOT attempt to read non-PDF files directly.
-
-Ask the user in a single message:
-
-> What do you have?
-> 1. **PDF files** — upload them and we start Phase 1.
-> 2. **A topic/concept list** — paste it and we skip to Phase 2.
-> 3. **Just a course name** — tell me and I'll search for a standard syllabus first.
->
-> Also: how many pages total (rough estimate is fine)? Preferred output language?
-
-### Step 2: Estimate scale and pick compression tier
-
-Count total pages from the user's answer. Apply immediately — do not ask again:
-
-| Total pages | Tier | Strategy |
-|---|---|---|
-| ≤ 60 | Light | Full extraction per page |
-| 61–200 | Medium | Batch by lecture; summarize per lecture |
-| 201–400 | Heavy | Batch + compress Phase 1 before Phase 2 |
-| > 400 | Split | Warn user; recommend per-module runs |
-
-### Step 3: Detect network and set mode
-
-Detect WebSearch availability silently. Tell the user in one line:
-- ✓ Web access available → Phase 3 will use live sources
-- ✗ No web access → Phase 3 will use curriculum knowledge only (no hallucinated sources)
-
-### Step 4: Ask depth + output dir in the same message
-
-> **Mode:** Focused (Phases 1+2+4, faster) or Complete (all 4 phases, deeper)?
-> **Output folder:** where to save files? (default: current directory)
-
-### Step 5: Confirm and go
-
-One-line summary, then start immediately on user confirmation. Do not ask further questions before Phase 1.
+Read `rules/phase-intake.md` and run the full intake workflow. Keep this to one exchange — do not ask questions across multiple messages.
 
 ---
 
@@ -72,8 +43,10 @@ Phase 2: Synthesize
 Phase 3: Expand (web sources OR curriculum-grounded)
   └── Output: course-expansion.md
 
-Phase 4: Study (final notes)
-  └── Output: study-notes.md
+Phase 4: Study Materials
+  ├── study-notes.md (always)
+  ├── quick-reference.md (Exam Ready only)
+  └── exam-qa.md (Exam Ready only)
 ```
 
 Each phase ends with a **brief checkpoint** (see below).
@@ -108,15 +81,47 @@ If no response issues → proceed immediately. No multi-question forms.
 
 6. **Track progress.** Use TodoList to track which lectures have been processed.
 
-7. **Multi-format output.** Final notes render in Markdown, PDF, and plain text. See [rules/templates.md](rules/templates.md).
+7. **Multi-format output.** Final notes are written in format-agnostic Markdown per `rules/templates.md`. When the user requests PDF output, read `rules/pdf-export.md` for pandoc font configuration and CJK handling before converting.
+
+8. **Prioritise flagged topics.** If the user named priority topics in Phase 0, give them deeper treatment in Phase 4 and ensure they appear in the Quick Reference and Exam Q&A.
 
 ---
 
-## Reference files
+## Phase 4 Output: Study Notes
 
-- [rules/phase-extract.md](rules/phase-extract.md) — Phase 1
-- [rules/phase-synthesize.md](rules/phase-synthesize.md) — Phase 2
-- [rules/phase-expand.md](rules/phase-expand.md) — Phase 3
-- [rules/phase-study.md](rules/phase-study.md) — Phase 4
-- [rules/templates.md](rules/templates.md) — Output format and PDF/font rules
-- [rules/subject-coverage.md](rules/subject-coverage.md) — Live search strategy for curriculum gap analysis
+The main study notes follow the structure in `rules/phase-study.md`. Every concept gets:
+
+- **What it is** — definition, instructor's phrasing first
+- **Intuition** — why it exists, what problem it solves
+- **Formal treatment** — LaTeX formulas or code blocks
+- **Worked example** — concrete, step-by-step
+- **Connections** — prerequisites and what this enables
+- **Common misconceptions**
+
+Exam Ready appendices (Quick Reference Sheet and Exam Q&A) are generated in Phase 4 as well — see `rules/phase-study.md` Steps 6a and 6b.
+
+---
+
+## Reference Files
+
+- `rules/phase-intake.md` — Phase 0 intake workflow
+- `rules/phase-extract.md` — Phase 1
+- `rules/phase-synthesize.md` — Phase 2
+- `rules/phase-expand.md` — Phase 3
+- `rules/phase-study.md` — Phase 4 (study notes + Exam Ready appendices)
+- `rules/templates.md` — Format-agnostic writing rules
+- `rules/pdf-export.md` — PDF conversion config (load only when PDF output is requested)
+- `rules/subject-coverage.md` — Live search strategy for curriculum gap analysis
+- `rules/changelog.md` — Version history
+
+---
+
+## Anti-Patterns
+
+| Avoid | Why | Instead |
+|-------|-----|---------|
+| Skipping worked examples | Students fail on application, not definitions | Mandatory for every non-trivial concept |
+| Quick Reference with prose | Defeats the purpose | One line per entry maximum |
+| Exam Q&A without source refs | Student can't verify or dig deeper | Every answer cites source location |
+| Ignoring Phase 0 priority topics | User told you what matters | Deeper treatment + appears in all appendices |
+| Fabricating exam question styles | Misleads preparation | Draw only from what the course actually covers |

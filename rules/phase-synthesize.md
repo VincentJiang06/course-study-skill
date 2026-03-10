@@ -44,6 +44,8 @@ Every well-designed course tells a story. Identify:
 
 Find the standard curriculum baseline for this subject using the search strategy in [subject-coverage.md](subject-coverage.md). Run 1-2 targeted searches (e.g., `"[subject] university course syllabus topics"`) to identify what a standard course in this field covers. This works for any subject — not just CS.
 
+If both searches return low-quality results (no syllabi, no textbook tables of contents, no course pages), fall back to Mode B (world knowledge) and mark the gap analysis: `[Gap analysis based on curriculum knowledge — web results insufficient]`. Do not retry the same queries or invent sources.
+
 Compare the actual course materials against this baseline. Identify:
 - **Core topics missing from the course** → high-priority flag for Phase 3
 - Topics covered **superficially** → medium-priority, candidates for Phase 3 expansion
